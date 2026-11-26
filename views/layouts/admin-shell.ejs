@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title + ' | QuLab Dosen' : 'Panel Dosen | QuLab' %></title>
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body class="bg-[#F7F7FB] text-[#1B1B2F] min-h-screen flex antialiased">
+  <!-- Sidebar Menu (IA Sec 4.1) -->
+  <%- include('../partials/admin-sidebar') %>
+
+  <!-- Main Content Wrapper -->
+  <div class="flex-1 flex flex-col min-w-0">
+    <!-- Header with Breadcrumb (DS Sec 8.1) -->
+    <%- include('../partials/admin-header') %>
+
+    <!-- Main Content Area (Max 1200px, padding 32px per DS Sec 7) -->
+    <main class="flex-1 p-8 max-w-[1200px] w-full mx-auto">
+      <%- body %>
+    </main>
+
+    <!-- Footer -->
+    <%- include('../partials/footer') %>
+  </div>
+</body>
+</html>

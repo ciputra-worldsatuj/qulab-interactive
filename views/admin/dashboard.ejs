@@ -1,0 +1,99 @@
+<div class="space-y-6">
+  <!-- Top Section: Welcome & Quick Action Buttons (IA Sec 4.1, M7) -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-[#1B1B2F]">Dashboard</h1>
+      <p class="text-sm text-[#5A5A72] mt-1">Selamat datang di Panel Kontrol QuLab.</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="/admin/matkul"
+        class="px-4 py-2 border border-[#DADAE6] bg-white text-[#1B1B2F] rounded-lg text-sm font-semibold hover:bg-[#F7F7FB] transition-colors shadow-sm">
+        Kelola Soal
+      </a>
+      <a href="/admin/sesi/baru"
+        class="px-4 py-2 bg-[#5B3FD1] text-white rounded-lg text-sm font-semibold hover:bg-[#4A31B0] transition-colors shadow-sm flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Buat Sesi Baru
+      </a>
+    </div>
+  </div>
+
+  <!-- Stats Grid (FR-RPT-04, IA Sec 4.1) -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="bg-white p-6 rounded-xl border border-[#DADAE6] shadow-sm">
+      <div class="text-xs font-semibold text-[#5A5A72] uppercase tracking-wider">Total Mata Kuliah</div>
+      <div class="text-3xl font-black text-[#1B1B2F] mt-2 tabular-nums">
+        <%= typeof totalMatkul !=='undefined' ? totalMatkul : 0 %>
+      </div>
+      <div class="text-xs text-[#5A5A72] mt-1">Mata kuliah aktif di sistem</div>
+    </div>
+    <div class="bg-white p-6 rounded-xl border border-[#DADAE6] shadow-sm">
+      <div class="text-xs font-semibold text-[#5A5A72] uppercase tracking-wider">Total Bank Soal</div>
+      <div class="text-3xl font-black text-[#5B3FD1] mt-2 tabular-nums">
+        <%= typeof totalSoal !=='undefined' ? totalSoal : 0 %>
+      </div>
+      <div class="text-xs text-[#5A5A72] mt-1">Pertanyaan pilihan ganda</div>
+    </div>
+    <div class="bg-white p-6 rounded-xl border border-[#DADAE6] shadow-sm">
+      <div class="text-xs font-semibold text-[#5A5A72] uppercase tracking-wider">Sesi Kuis Selesai</div>
+      <div class="text-3xl font-black text-[#1F8A57] mt-2 tabular-nums">
+        <%= typeof totalSesi !=='undefined' ? totalSesi : 0 %>
+      </div>
+      <div class="text-xs text-[#5A5A72] mt-1">Riwayat pelaksanaan kelas</div>
+    </div>
+  </div>
+
+  <!-- Sesi Terakhir / Ringkasan Table -->
+  <div class="bg-white rounded-xl border border-[#DADAE6] shadow-sm overflow-hidden">
+    <div class="px-6 py-4 border-b border-[#DADAE6] flex items-center justify-between">
+      <h2 class="font-bold text-[#1B1B2F]">Riwayat Sesi Terakhir</h2>
+      <a href="/admin/riwayat" class="text-xs text-[#5B3FD1] font-semibold hover:underline">Lihat Semua Riwayat
+        &rarr;</a>
+    </div>
+    <table class="w-full text-left text-sm">
+      <thead class="bg-[#F7F7FB] border-b border-[#DADAE6] text-[#5A5A72] text-xs uppercase font-semibold">
+        <tr>
+          <th class="px-6 py-3.5">Tanggal</th>
+          <th class="px-6 py-3.5">Mata Kuliah</th>
+          <th class="px-6 py-3.5 w-24">PIN</th>
+          <th class="px-6 py-3.5 w-32">Peserta</th>
+          <th class="px-6 py-3.5 text-right w-36">Aksi</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-[#DADAE6]">
+        <% if (typeof riwayatTerakhir !=='undefined' && riwayatTerakhir.length> 0) { %>
+          <% riwayatTerakhir.forEach(function(r) { %>
+            <tr class="hover:bg-[#F7F7FB] transition-colors">
+              <td class="px-6 py-4 text-[#1B1B2F] whitespace-nowrap">
+                <%= new Date(r.dibuat_pada).toLocaleDateString('id-ID', { day: 'numeric' , month: 'short' ,
+                  year: 'numeric' }) %>
+              </td>
+              <td class="px-6 py-4 font-semibold text-[#1B1B2F]">
+                <%= r.matkul_nama %> (<%= r.jumlah_soal %> Soal)
+              </td>
+              <td class="px-6 py-4 font-mono font-bold text-[#5B3FD1]">
+                <%= r.pin %>
+              </td>
+              <td class="px-6 py-4 text-[#5A5A72]">
+                <%= r.total_peserta || 0 %> Mahasiswa
+              </td>
+              <td class="px-6 py-4 text-right">
+                <a href="/admin/riwayat/<%= r.id %>" class="text-xs font-semibold text-[#5B3FD1] hover:underline">
+                  Lihat Rekap
+                </a>
+              </td>
+            </tr>
+            <% }); %>
+              <% } else { %>
+                <tr>
+                  <td colspan="5" class="px-6 py-12 text-center text-[#5A5A72]">
+                    Belum ada riwayat pelaksanaan sesi kuis.
+                  </td>
+                </tr>
+                <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>

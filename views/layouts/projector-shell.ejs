@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>
+    <%= typeof title !=='undefined' ? title + ' | Proyektor QuLab' : 'Layar Proyektor | QuLab' %>
+  </title>
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+
+<body
+  class="bg-[#14122B] text-white min-h-screen antialiased flex flex-col justify-between overflow-hidden select-none">
+  <!-- Safe Zone Margin 64px (DS Sec 8.4) -->
+  <div class="flex-1 flex flex-col p-16 w-full h-full max-w-[1920px] mx-auto">
+    <!-- Projector Header -->
+    <header class="flex items-center justify-between pb-6 border-b border-[#2E2D3D] shrink-0">
+      <div class="flex items-center gap-3">
+        <span
+          class="w-10 h-10 rounded-xl bg-[#5B3FD1] text-white font-extrabold flex items-center justify-center text-xl">Q</span>
+        <span class="font-extrabold text-2xl tracking-tight text-white">QuLab</span>
+      </div>
+      <% if (typeof sessionPin !=='undefined' && sessionPin) { %>
+        <div class="flex items-center gap-4">
+          <span class="text-lg text-[#A7A9BE]">PIN Sesi:</span>
+          <span
+            class="text-3xl font-extrabold tracking-widest text-[#F5A524] bg-[#231F47] px-5 py-1.5 rounded-xl border border-[#2E2D3D]">
+            <%= sessionPin %>
+          </span>
+        </div>
+        <% } %>
+    </header>
+
+    <!-- Main Projector Content (12 Kolom DS Sec 7) -->
+    <main class="flex-1 flex flex-col justify-center py-8">
+      <%- body %>
+    </main>
+
+    <!-- Projector Footer (Status indicator only) -->
+    <footer class="flex items-center justify-between pt-4 border-t border-[#2E2D3D] text-sm text-[#A7A9BE] shrink-0">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-[#1F8A57] animate-pulse"></span>
+        <span>Sesi Real-Time</span>
+      </div>
+      <div>Copyright &copy; 2026 &mdash; QuLab&excl; All Rights Reserved.</div>
+    </footer>
+  </div>
+</body>
+
+</html>

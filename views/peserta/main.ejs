@@ -1,0 +1,333 @@
+<!-- Ruang Kuis Peserta Real-Time (M-02 s/d M-08) -->
+<div id="participant-container" class="flex-1 flex flex-col justify-between">
+
+  <!-- Status Indikator Atas (Nomor Soal & Countdown Timer Bar) -->
+  <div id="top-indicator" class="hidden mb-4">
+    <div class="flex items-center justify-between text-xs text-[#5A5A72] pb-1.5">
+      <span id="quiz-progress" class="font-bold">Soal 1 dari 10</span>
+      <span id="quiz-timer" class="font-black text-[#C93A40] text-sm tabular-nums font-mono">20s</span>
+    </div>
+    <!-- Progress Bar Countdown (DS Sec 3 Zoom & Timer bar) -->
+    <div class="w-full bg-[#DADAE6] h-2 rounded-full overflow-hidden">
+      <div id="timer-bar" class="bg-[#5B3FD1] h-full w-full transition-all ease-linear"></div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- STATE M-02: TUNGGU LOBBY -->
+  <!-- ======================================================== -->
+  <div id="stage-lobby" class="flex-1 flex flex-col items-center justify-center text-center p-6 space-y-4">
+    <div
+      class="w-20 h-20 rounded-full bg-emerald-100 text-[#1F8A57] flex items-center justify-center mx-auto shadow-sm">
+      <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+      </svg>
+    </div>
+    <h2 class="text-2xl font-black text-[#1B1B2F]">Anda Sudah Masuk!</h2>
+    <p class="text-sm text-[#5A5A72] leading-relaxed max-w-xs mx-auto">
+      Hello <strong class="text-[#1B1B2F]">
+        <%= participantName %>
+      </strong><br>
+      Kuis akan segera dimulai ...
+    </p>
+    <div class="pt-4 flex items-center gap-2 text-xs font-semibold text-[#5B3FD1]">
+      <span class="w-2 h-2 rounded-full bg-[#5B3FD1] animate-ping"></span>
+      Terhubung ke server lokal
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- STATE M-03: SOAL & OPSI BERTUMPUK (UF-10) -->
+  <!-- ======================================================== -->
+  <div id="stage-question" class="hidden flex-1 flex flex-col justify-between">
+    <div class="mb-3">
+      <h3 id="question-text" class="text-lg md:text-xl font-bold text-[#1B1B2F] leading-snug">
+        Pertanyaan Kuis...
+      </h3>
+      <div id="question-image-box" class="hidden mt-2">
+        <img id="question-image" src="" alt="Gambar Soal"
+          class="max-h-40 rounded-xl border border-[#DADAE6] mx-auto object-contain">
+      </div>
+    </div>
+
+    <!-- 4 Tombol Pilihan Opsi Bertumpuk Ramah Ibu Jari (DS Sec 7 & 8.2, Min 64px) -->
+    <div id="options-container" class="space-y-2.5 my-auto">
+      <!-- Injected via Socket -->
+    </div>
+
+    <!-- Tombol Kirim Jawaban (Hanya muncul bila soal multi-choice / checkbox) -->
+    <div id="multi-submit-box" class="hidden pt-3">
+      <button type="button" onclick="submitMultiAnswer()"
+        class="w-full min-h-[48px] bg-[#5B3FD1] hover:bg-[#4A31B0] text-white font-bold py-3.5 px-6 rounded-xl text-base shadow active:scale-[0.99]">
+        Kirim Jawaban
+      </button>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- STATE M-04: JAWABAN TERKUNCI (M-04) -->
+  <!-- ======================================================== -->
+  <div id="stage-locked" class="hidden flex-1 flex flex-col items-center justify-center text-center p-6 space-y-4">
+    <div class="w-16 h-16 rounded-full bg-indigo-100 text-[#5B3FD1] flex items-center justify-center mx-auto shadow-sm">
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+      </svg>
+    </div>
+    <h2 class="text-2xl font-black text-[#1B1B2F]">Jawaban Terkunci!</h2>
+    <p class="text-sm text-[#5A5A72] max-w-xs mx-auto">
+      Jawaban Anda telah dicatat oleh server. Menunggu waktu soal berakhir...
+    </p>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- STATE M-05: HASIL SOAL / FEEDBACK (M-05, UF-11) -->
+  <!-- ======================================================== -->
+  <div id="stage-result" class="hidden flex-1 flex flex-col items-center justify-center text-center p-6 space-y-4">
+    <div id="result-icon-box" class="w-20 h-20 rounded-full flex items-center justify-center mx-auto shadow-md">
+      <!-- Injected -->
+    </div>
+    <h2 id="result-title" class="text-3xl font-black">Benar!</h2>
+    <p id="result-points" class="text-lg font-bold text-[#1B1B2F]">+1000 Poin</p>
+    <p class="text-xs text-[#5A5A72]">Lihat grafik sebaran jawaban di layar proyektor</p>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- STATE M-06: NILAI AKHIR (M-06, UF-11, DS Sec 5: 56px) -->
+  <!-- ======================================================== -->
+  <div id="stage-final" class="hidden flex-1 flex flex-col items-center justify-center text-center p-6 space-y-5">
+    <div class="text-xs font-bold uppercase tracking-widest text-[#5A5A72]">Kuis Selesai</div>
+    <h2 class="text-2xl font-black text-[#1B1B2F]">Nilai Akhir Anda</h2>
+
+    <!-- Persentase Nilai Raksasa (56px) -->
+    <div id="final-percentage" class="text-6xl md:text-7xl font-black text-[#5B3FD1] tabular-nums font-mono">
+      100%
+    </div>
+
+    <div class="bg-[#F7F7FB] p-4 rounded-xl border border-[#DADAE6] w-full max-w-xs space-y-2 text-sm">
+      <div class="flex items-center justify-between">
+        <span class="text-[#5A5A72]">Peringkat Anda:</span>
+        <span id="final-rank" class="font-bold text-[#1B1B2F]">#1</span>
+      </div>
+      <div class="flex items-center justify-between">
+        <span class="text-[#5A5A72]">Total Poin:</span>
+        <span id="final-points" class="font-bold text-[#5B3FD1] font-mono">0</span>
+      </div>
+      <div class="flex items-center justify-between">
+        <span class="text-[#5A5A72]">Jawaban Benar:</span>
+        <span id="final-correct" class="font-bold text-[#1F8A57]">0</span>
+      </div>
+      <div class="flex items-center justify-between">
+        <span class="text-[#5A5A72]">Jawaban Salah:</span>
+        <span id="final-wrong" class="font-bold text-[#C93A40]">0</span>
+      </div>
+    </div>
+
+    <a href="/" class="mt-4 px-6 py-2.5 bg-[#5B3FD1] text-white rounded-xl text-sm font-semibold hover:bg-[#4A31B0]">
+      Kembali ke Beranda
+    </a>
+  </div>
+
+</div>
+
+<!-- Socket.IO Client Script (Offline Lokal) -->
+<script src="/js/socket.io.min.js"></script>
+<script>
+  const pin = '<%= sessionPin %>';
+  const pesertaId = <%= pesertaId %>;
+  const nama = '<%= participantName %>';
+  const socket = io();
+
+  let currentSesiSoalId = null;
+  let currentIsMulti = false;
+  let timerInterval = null;
+  let selectedMultiOptions = new Set();
+
+  // 1. Hubungkan peserta ke room kuis sesi
+  socket.emit('peserta_join', { pin, pesertaId, nama });
+
+  // Ditendang dari sesi oleh dosen (UF-06, M-07)
+  socket.on('kicked', () => {
+    window.location.href = '/?status=kicked';
+  });
+
+  socket.on('sesi_error', (data) => {
+    alert(data.message || 'Terjadi galat pada sesi.');
+    window.location.href = '/';
+  });
+
+  // 2. Kuis Dimulai / Soal Tampil (UF-10)
+  socket.on('soal_ditampilkan_peserta', (data) => {
+    currentSesiSoalId = data.sesiSoalId;
+    currentIsMulti = data.isMulti;
+    selectedMultiOptions.clear();
+
+    switchStage('stage-question');
+    document.getElementById('top-indicator').classList.remove('hidden');
+
+    document.getElementById('quiz-progress').textContent = `Soal ${data.soalIndex} dari ${data.totalSoal}`;
+    document.getElementById('question-text').textContent = data.teks;
+
+    if (data.gambar_path) {
+      document.getElementById('question-image').src = data.gambar_path;
+      document.getElementById('question-image-box').classList.remove('hidden');
+    } else {
+      document.getElementById('question-image-box').classList.add('hidden');
+    }
+
+    // Tampilkan 4 opsi bertumpuk ramah ibu jari (DS Sec 7 & 8.2)
+    const optionsContainer = document.getElementById('options-container');
+    const optStyles = [
+      { bg: 'bg-[#C93A40] text-white active:bg-red-800', shape: '▲' },
+      { bg: 'bg-[#2F4FC7] text-white active:bg-blue-800', shape: '◆' },
+      { bg: 'bg-[#F5A524] text-[#1F1300] active:bg-amber-600', shape: '●' },
+      { bg: 'bg-[#1F8A57] text-white active:bg-emerald-800', shape: '■' }
+    ];
+
+    optionsContainer.innerHTML = data.opsi.map((op, idx) => {
+      const style = optStyles[idx % 4];
+      if (data.isMulti) {
+        return `
+          <button type="button" id="opt-btn-${op.id}" onclick="toggleMultiOption(${op.id})" class="w-full min-h-[64px] ${style.bg} p-4 rounded-xl flex items-center gap-3 text-left font-bold shadow-sm border-2 border-transparent transition-all">
+            <span class="w-8 h-8 rounded-lg bg-black/20 flex items-center justify-center shrink-0">${style.shape}</span>
+            <span class="text-base flex-1 leading-snug">${escapeHtml(op.teks)}</span>
+            <span id="check-icon-${op.id}" class="hidden text-xl font-black">&#10003;</span>
+          </button>
+        `;
+      } else {
+        return `
+          <button type="button" onclick="selectSingleOption(${op.id})" class="w-full min-h-[64px] ${style.bg} p-4 rounded-xl flex items-center gap-3 text-left font-bold shadow-sm transition-transform active:scale-[0.98]">
+            <span class="w-8 h-8 rounded-lg bg-black/20 flex items-center justify-center shrink-0">${style.shape}</span>
+            <span class="text-base flex-1 leading-snug">${escapeHtml(op.teks)}</span>
+          </button>
+        `;
+      }
+    }).join('');
+
+    const multiBox = document.getElementById('multi-submit-box');
+    if (data.isMulti) multiBox.classList.remove('hidden');
+    else multiBox.classList.add('hidden');
+
+    // Timer lokal visual
+    startTimer(data.waktuDetik);
+  });
+
+  // Pilih Jawaban Single-Choice (Langsung Kunci)
+  function selectSingleOption(opsiId) {
+    socket.emit('kirim_jawaban', {
+      pin,
+      sesiSoalId: currentSesiSoalId,
+      opsiIds: [opsiId]
+    });
+  }
+
+  // Pilih Jawaban Multi-Choice (Checkboxes)
+  function toggleMultiOption(opsiId) {
+    const btn = document.getElementById(`opt-btn-${opsiId}`);
+    const check = document.getElementById(`check-icon-${opsiId}`);
+
+    if (selectedMultiOptions.has(opsiId)) {
+      selectedMultiOptions.delete(opsiId);
+      btn.classList.remove('ring-4', 'ring-white', 'border-white');
+      check.classList.add('hidden');
+    } else {
+      selectedMultiOptions.add(opsiId);
+      btn.classList.add('ring-4', 'ring-white', 'border-white');
+      check.classList.remove('hidden');
+    }
+  }
+
+  function submitMultiAnswer() {
+    if (selectedMultiOptions.size === 0) {
+      alert('Pilih minimal satu jawaban sebelum mengirim!');
+      return;
+    }
+    socket.emit('kirim_jawaban', {
+      pin,
+      sesiSoalId: currentSesiSoalId,
+      opsiIds: Array.from(selectedMultiOptions)
+    });
+  }
+
+  // Jawaban Diterima & Terkunci di Server (Feedback M-04)
+  socket.on('jawaban_terkunci', () => {
+    switchStage('stage-locked');
+  });
+
+  // 3. Feedback Hasil Soal (UF-11, M-05)
+  socket.on('hasil_soal_peserta', (data) => {
+    if (timerInterval) clearInterval(timerInterval);
+    switchStage('stage-result');
+
+    const iconBox = document.getElementById('result-icon-box');
+    const title = document.getElementById('result-title');
+    const points = document.getElementById('result-points');
+
+    if (data.isBenar) {
+      iconBox.className = 'w-20 h-20 rounded-full bg-emerald-100 text-[#1F8A57] flex items-center justify-center mx-auto shadow-md';
+      iconBox.innerHTML = '<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>';
+      title.className = 'text-3xl font-black text-[#1F8A57]';
+      title.textContent = 'Jawaban Benar!';
+      points.textContent = `+${data.poin} Poin`;
+    } else {
+      iconBox.className = 'w-20 h-20 rounded-full bg-red-100 text-[#C93A40] flex items-center justify-center mx-auto shadow-md';
+      iconBox.innerHTML = '<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>';
+      title.className = 'text-3xl font-black text-[#C93A40]';
+      title.textContent = data.isAnswered ? 'Jawaban Salah' : 'Waktu Habis!';
+      points.textContent = '+0 Poin';
+    }
+  });
+
+  // 4. Nilai Akhir Kuis (UF-11, M-06)
+  socket.on('kuis_selesai_peserta', (data) => {
+    if (timerInterval) clearInterval(timerInterval);
+    document.getElementById('top-indicator').classList.add('hidden');
+    switchStage('stage-final');
+
+    document.getElementById('final-percentage').textContent = `${data.persentase}%`;
+    document.getElementById('final-rank').textContent = `#${data.peringkat}`;
+    document.getElementById('final-points').textContent = data.totalPoin;
+    document.getElementById('final-correct').textContent = data.jumlahBenar;
+    document.getElementById('final-wrong').textContent = data.jumlahSalah;
+  });
+
+  function startTimer(totalSeconds) {
+    if (timerInterval) clearInterval(timerInterval);
+    let sisa = totalSeconds;
+    const timerText = document.getElementById('quiz-timer');
+    const timerBar = document.getElementById('timer-bar');
+
+    timerText.textContent = `${sisa}s`;
+    timerBar.style.width = '100%';
+
+    timerInterval = setInterval(() => {
+      sisa--;
+      if (sisa <= 0) {
+        clearInterval(timerInterval);
+        timerText.textContent = '0s';
+        timerBar.style.width = '0%';
+      } else {
+        timerText.textContent = `${sisa}s`;
+        const pct = (sisa / totalSeconds) * 100;
+        timerBar.style.width = `${pct}%`;
+      }
+    }, 1000);
+  }
+
+  function switchStage(targetId) {
+    const stages = ['stage-lobby', 'stage-question', 'stage-locked', 'stage-result', 'stage-final'];
+    stages.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        if (id === targetId) el.classList.remove('hidden');
+        else el.classList.add('hidden');
+      }
+    });
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+</script>

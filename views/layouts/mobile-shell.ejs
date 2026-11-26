@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>
+    <%= typeof title !=='undefined' ? title + ' | QuLab Peserta' : 'Peserta | QuLab' %>
+  </title>
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+
+<body class="bg-[#F7F7FB] text-[#1B1B2F] min-h-screen antialiased flex flex-col justify-between">
+  <!-- Container 1 Kolom Maksimal 480px di Tengah (DS Sec 7) -->
+  <div
+    class="w-full max-w-[480px] mx-auto min-h-screen flex flex-col px-4 py-6 bg-white shadow-sm sm:border-x sm:border-[#DADAE6]">
+    <!-- Mobile Header -->
+    <header class="flex items-center justify-between pb-4 border-b border-[#DADAE6] mb-6">
+      <div class="flex items-center gap-2">
+        <span
+          class="w-7 h-7 rounded-lg bg-[#5B3FD1] text-white font-bold flex items-center justify-center text-sm">Q</span>
+        <span class="font-bold text-[#5B3FD1] tracking-tight">QuLab</span>
+      </div>
+      <% if (typeof participantName !=='undefined' && participantName) { %>
+        <span
+          class="text-xs bg-[#F7F7FB] text-[#5A5A72] px-2.5 py-1 rounded-full border border-[#DADAE6] font-medium truncate max-w-[150px]">
+          <%= participantName %>
+        </span>
+        <% } else { %>
+          <span class="text-xs text-[#5A5A72]">Kuis Interaktif Real-Time</span>
+          <% } %>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col">
+      <%- body %>
+    </main>
+
+    <!-- Mobile Sticky/Bottom Safe Area -->
+    <footer class="pt-6 text-center text-xs text-[#5A5A72]">
+      Copyright &copy; 2026 &mdash; QuLab&excl; All Rights Reserved.
+    </footer>
+  </div>
+</body>
+
+</html>

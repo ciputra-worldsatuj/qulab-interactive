@@ -1,0 +1,31 @@
+# Inisialisasi Database (Hanya Sekali di Awal)
+# Import database manual qulab.sql pada folder database (recommendation)
+# Jika tidak ingin buka terminal (PowerShell atau Command Prompt) di folder proyek ini, lalu jalankan:
+# npm.cmd run db:init
+
+Default account (Import)
+Username: dosen
+Password: P@ssw0rd!@3
+
+Default account (db:init)
+Username: dosen
+Password: admin
+
+Installation Step
+1. create database qulab
+2. import qulab
+3. Connect wifi My Lab
+4. Setup IP static device 192.168.10.10
+3. npm run dev pada file project 
+====================================================
+[QuLab] Server berjalan di port 3000
+[QuLab] Akses Dosen (Laptop):      http://localhost:3000/auth/login
+[QuLab] Akses Peserta (WiFi HP):   http://192.168.10.10:3000
+[QuLab] Layar Proyektor:          http://localhost:3000/proyektor/<PIN>
+====================================================
+
+Game Step
+1. Create Mata Kuliah
+2. Kelola dan Tambah Soal
+3. Sesi Kuis dan Mulai
+4. Buka Layar Proyektor (Tampilan proyektor kelas)

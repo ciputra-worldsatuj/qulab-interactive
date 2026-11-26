@@ -1,0 +1,130 @@
+<div class="space-y-6">
+  <!-- Header & Tambah Matkul -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-[#1B1B2F]">Mata Kuliah</h1>
+      <p class="text-sm text-[#5A5A72] mt-1">Kelola mata kuliah dan wadah bank soal kuis.</p>
+    </div>
+    <button type="button" onclick="document.getElementById('modal-tambah-matkul').classList.remove('hidden')" class="px-4 py-2 bg-[#5B3FD1] text-white rounded-lg text-sm font-semibold hover:bg-[#4A31B0] transition-colors flex items-center gap-2 shadow-sm">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Tambah Mata Kuliah
+    </button>
+  </div>
+
+  <!-- Alert Notifikasi -->
+  <% if (typeof success !== 'undefined' && success) { %>
+    <div class="p-3 bg-emerald-50 border border-[#1F8A57] text-[#1F8A57] rounded-lg text-xs font-medium flex items-center gap-2">
+      <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+      <span><%= success %></span>
+    </div>
+  <% } %>
+
+  <% if (typeof error !== 'undefined' && error) { %>
+    <div class="p-3 bg-red-50 border border-[#C93A40] text-[#C93A40] rounded-lg text-xs font-medium flex items-center gap-2">
+      <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <span><%= error %></span>
+    </div>
+  <% } %>
+
+  <!-- Table Container (D-03, FR-MK-03) -->
+  <div class="bg-white rounded-xl border border-[#DADAE6] shadow-sm overflow-hidden">
+    <table class="w-full text-left text-sm">
+      <thead class="bg-[#F7F7FB] border-b border-[#DADAE6] text-[#5A5A72] text-xs uppercase font-semibold">
+        <tr>
+          <th class="px-6 py-3.5">Nama Mata Kuliah</th>
+          <th class="px-6 py-3.5 w-36">Jumlah Soal</th>
+          <th class="px-6 py-3.5 text-right w-64">Aksi</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-[#DADAE6]">
+        <% if (typeof matkulList !== 'undefined' && matkulList.length > 0) { %>
+          <% matkulList.forEach(function(m) { %>
+            <tr class="hover:bg-[#F7F7FB] transition-colors">
+              <td class="px-6 py-4 font-semibold text-[#1B1B2F]">
+                <%= m.nama %>
+              </td>
+              <td class="px-6 py-4 text-[#5A5A72]">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-[#5B3FD1]">
+                  <%= m.jumlah_soal || 0 %> Soal
+                </span>
+              </td>
+              <td class="px-6 py-4 text-right space-x-2">
+                <a href="/admin/matkul/<%= m.id %>/soal" class="inline-flex items-center px-3 py-1.5 bg-[#5B3FD1] text-white rounded-lg text-xs font-medium hover:bg-[#4A31B0]">
+                  Kelola Soal
+                </a>
+                <button type="button" onclick="editMatkul(<%= m.id %>, '<%= m.nama.replace(/'/g, "\\'") %>')" class="inline-flex items-center px-2.5 py-1.5 border border-[#DADAE6] text-[#1B1B2F] rounded-lg text-xs font-medium hover:bg-[#F7F7FB]">
+                  Ubah
+                </button>
+                <form action="/admin/matkul/<%= m.id %>/delete" method="POST" class="inline" onsubmit="return confirm('PENTING: Menghapus mata kuliah ini akan menghapus seluruh bank soal dan riwayat sesi terkait. Lanjutkan?')">
+                  <button type="submit" class="inline-flex items-center px-2.5 py-1.5 border border-red-200 text-[#C93A40] rounded-lg text-xs font-medium hover:bg-red-50">
+                    Hapus
+                  </button>
+                </form>
+              </td>
+            </tr>
+          <% }); %>
+        <% } else { %>
+          <tr>
+            <td colspan="3" class="px-6 py-12 text-center text-[#5A5A72]">
+              Belum ada mata kuliah yang ditambahkan. Silakan klik tombol <strong>+ Tambah Mata Kuliah</strong> di atas.
+            </td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal Tambah Matkul -->
+<div id="modal-tambah-matkul" class="fixed inset-0 bg-black/40 hidden flex items-center justify-center p-4 z-50">
+  <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-xl border border-[#DADAE6]">
+    <h3 class="text-lg font-bold text-[#1B1B2F] mb-3">Tambah Mata Kuliah Baru</h3>
+    <form action="/admin/matkul" method="POST" class="space-y-4">
+      <div>
+        <label for="nama" class="block text-xs font-semibold text-[#1B1B2F] mb-1">Nama Mata Kuliah</label>
+        <input type="text" id="nama" name="nama" class="w-full px-3 py-2 border border-[#DADAE6] rounded-lg text-sm focus:outline-none focus:border-[#5B3FD1]" placeholder="Contoh: Algoritma & Pemrograman" required>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button type="button" onclick="document.getElementById('modal-tambah-matkul').classList.add('hidden')" class="px-4 py-2 border border-[#DADAE6] text-[#1B1B2F] rounded-lg text-xs font-medium hover:bg-[#F7F7FB]">
+          Batal
+        </button>
+        <button type="submit" class="px-4 py-2 bg-[#5B3FD1] text-white rounded-lg text-xs font-semibold hover:bg-[#4A31B0]">
+          Simpan
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Ubah Matkul -->
+<div id="modal-ubah-matkul" class="fixed inset-0 bg-black/40 hidden flex items-center justify-center p-4 z-50">
+  <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-xl border border-[#DADAE6]">
+    <h3 class="text-lg font-bold text-[#1B1B2F] mb-3">Ubah Mata Kuliah</h3>
+    <form id="form-ubah-matkul" method="POST" class="space-y-4">
+      <div>
+        <label for="edit_nama" class="block text-xs font-semibold text-[#1B1B2F] mb-1">Nama Mata Kuliah</label>
+        <input type="text" id="edit_nama" name="nama" class="w-full px-3 py-2 border border-[#DADAE6] rounded-lg text-sm focus:outline-none focus:border-[#5B3FD1]" required>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button type="button" onclick="document.getElementById('modal-ubah-matkul').classList.add('hidden')" class="px-4 py-2 border border-[#DADAE6] text-[#1B1B2F] rounded-lg text-xs font-medium hover:bg-[#F7F7FB]">
+          Batal
+        </button>
+        <button type="submit" class="px-4 py-2 bg-[#5B3FD1] text-white rounded-lg text-xs font-semibold hover:bg-[#4A31B0]">
+          Perbarui
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function editMatkul(id, nama) {
+    const modal = document.getElementById('modal-ubah-matkul');
+    const form = document.getElementById('form-ubah-matkul');
+    const input = document.getElementById('edit_nama');
+    form.action = '/admin/matkul/' + id + '/update';
+    input.value = nama;
+    modal.classList.remove('hidden');
+    input.focus();
+  }
+</script>

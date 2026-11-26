@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Design Tokens from design-system.md Section 11 */
+  --color-primary: #5B3FD1;
+  --color-primary-hover: #4A31B0;
+  --color-bg: #F7F7FB;
+  --color-surface: #FFFFFF;
+  --color-text: #1B1B2F;
+  --color-text-muted: #5A5A72;
+  --color-border: #DADAE6;
+
+  /* Status */
+  --color-success: #1F8A57;
+  --color-error: #C93A40;
+  --color-warning: #8F5F0A;
+  --color-info: #2F4FC7;
+
+  /* Opsi Jawaban */
+  --opt-a: #C93A40;
+  --opt-b: #2F4FC7;
+  --opt-c: #F5A524;
+  --opt-d: #1F8A57;
+
+  /* Proyektor Dark Theme */
+  --proj-bg: #0F0E17;
+  --proj-surface: #1C1B29;
+  --proj-text: #FFFFFE;
+  --proj-text-muted: #A7A9BE;
+
+  /* Tipografi & Bentuk */
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --shadow-card: 0 1px 3px rgba(27, 27, 47, 0.12);
+  --motion-fast: 150ms;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+}

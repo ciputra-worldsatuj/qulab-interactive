@@ -1,0 +1,392 @@
+<!-- Tampilan Layar Proyektor Kelas (P-01 s/d P-05) -->
+<div id="projector-viewport" class="flex-1 flex flex-col justify-center items-center text-center w-full">
+
+  <!-- ======================================================== -->
+  <!-- STATE P-01: LOBBY (PIN, QR CODE, DAFTAR NAMA) -->
+  <!-- ======================================================== -->
+  <div id="state-lobby" class="space-y-4 max-w-4xl w-full">
+    <div class="space-y-1">
+      <h2 class="text-lg md:text-xl font-bold text-[#A7A9BE] uppercase tracking-widest">
+        Buka di Browser HP Anda:
+      </h2>
+      <div
+        class="text-2xl md:text-4xl font-black text-[#5B3FD1] bg-white text-[#1B1B2F] inline-block px-8 py-2 rounded-2xl shadow-2xl font-mono">
+        http://<%= hostIp %>:3000
+      </div>
+    </div>
+
+    <!-- QR Code Scan Offline (Tepat di Atas Teks PIN) -->
+    <% if (typeof qrDataUrl !=='undefined' && qrDataUrl) { %>
+      <div class="flex flex-col items-center justify-center my-2">
+        <div class="p-3 bg-white rounded-2xl shadow-2xl border-4 border-[#5B3FD1] inline-block">
+          <span class="block text-xs font-black text-[#5B3FD1] mt-1 uppercase tracking-wider">atau Scan QR Code</span>
+          <img src="<%= qrDataUrl %>" alt="QR Code Masuk Kuis"
+            class="w-94 h-94 md:w-92 md:h-92 rounded-lg object-contain">
+        </div>
+      </div>
+      <% } %>
+
+        <!-- PIN Raksasa (DS Sec 5: 120px) -->
+        <div class="py-1">
+          <span class="text-sm md:text-base font-bold uppercase tracking-wider text-[#A7A9BE] block mb-0.5">PIN Kuis
+          </span>
+          <div
+            class="text-7xl md:text-[100px] font-black text-[#F5A524] tracking-widest font-mono select-all leading-tight">
+            <%= pin %>
+          </div>
+        </div>
+
+        <!-- Daftar Peserta Real-Time di Proyektor -->
+        <div class="bg-[#231F47] rounded-2xl border border-[#2E2D3D] p-5 max-w-3xl mx-auto shadow-xl">
+          <div class="text-xl font-black text-white mb-3 flex items-center justify-center gap-3">
+            <span>Peserta Bergabung:</span>
+            <span id="proj-total-peserta" class="text-[#1F8A57] font-black text-2xl tabular-nums">0</span>
+          </div>
+
+          <div id="proj-peserta-list"
+            class="flex flex-wrap items-center justify-center gap-2 max-h-40 overflow-y-auto p-1">
+            <span class="text-sm text-[#A7A9BE]">Menunggu mahasiswa memasukkan nama di HP masing-masing...</span>
+          </div>
+        </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- STATE P-02: SOAL & OPSI 2X2 (40-56px Teks Soal) -->
+  <!-- ======================================================== -->
+  <div id="state-soal" class="hidden w-full max-w-6xl flex flex-col justify-between h-full space-y-6">
+    <!-- Header Soal (Nomor, Timer, Status Terjawab) -->
+    <div class="flex items-center justify-between border-b border-[#2E2D3D] pb-4">
+      <span id="proj-soal-nomor" class="text-2xl font-extrabold text-[#A7A9BE] uppercase tracking-wider">
+        Soal 1 dari 10
+      </span>
+
+      <!-- Timer Raksasa (Tabular Nums) -->
+      <div class="flex items-center gap-3 bg-[#231F47] px-6 py-2 rounded-2xl border border-[#2E2D3D]">
+        <span class="text-lg text-[#A7A9BE]">Waktu:</span>
+        <span id="proj-timer-num" class="text-5xl font-black text-[#F5A524] tabular-nums font-mono">20</span>
+      </div>
+
+      <div class="text-xl font-bold text-white">
+        Terjawab: <span id="proj-answered-count" class="text-[#1F8A57] text-3xl font-black tabular-nums">0</span> /
+        <span id="proj-soal-total-peserta">0</span>
+      </div>
+    </div>
+
+    <!-- Teks Pertanyaan Utama (DS Sec 0: 40 sampai 56px) -->
+    <div class="my-auto py-4">
+      <h1 id="proj-soal-teks" class="text-3xl md:text-5xl font-black text-white leading-tight max-w-4xl mx-auto">
+        Pertanyaan Kuis...
+      </h1>
+      <div id="proj-soal-gambar-box" class="hidden mt-4">
+        <img id="proj-soal-gambar" src="" alt="Gambar Soal"
+          class="max-h-56 mx-auto rounded-xl border border-[#2E2D3D] shadow-lg object-contain">
+      </div>
+    </div>
+
+    <!-- Grid 2x2 Opsi Jawaban (DS Sec 7 & 8.3) -->
+    <div class="grid grid-cols-2 gap-4 text-left">
+      <!-- Opsi A (Merah ▲) -->
+      <div id="proj-card-opt-0" class="bg-[#C93A40] text-white p-5 rounded-2xl flex items-center gap-4 shadow-lg">
+        <span
+          class="w-12 h-12 rounded-xl bg-black/25 flex items-center justify-center font-black text-2xl shrink-0">▲</span>
+        <span id="proj-teks-opt-0" class="text-2xl font-bold leading-snug">Opsi A</span>
+      </div>
+
+      <!-- Opsi B (Biru ◆) -->
+      <div id="proj-card-opt-1" class="bg-[#2F4FC7] text-white p-5 rounded-2xl flex items-center gap-4 shadow-lg">
+        <span
+          class="w-12 h-12 rounded-xl bg-black/25 flex items-center justify-center font-black text-2xl shrink-0">◆</span>
+        <span id="proj-teks-opt-1" class="text-2xl font-bold leading-snug">Opsi B</span>
+      </div>
+
+      <!-- Opsi C (Kuning ●) -->
+      <div id="proj-card-opt-2" class="bg-[#F5A524] text-[#1F1300] p-5 rounded-2xl flex items-center gap-4 shadow-lg">
+        <span
+          class="w-12 h-12 rounded-xl bg-black/25 flex items-center justify-center font-black text-2xl shrink-0">●</span>
+        <span id="proj-teks-opt-2" class="text-2xl font-black leading-snug">Opsi C</span>
+      </div>
+
+      <!-- Opsi D (Hijau ■) -->
+      <div id="proj-card-opt-3" class="bg-[#1F8A57] text-white p-5 rounded-2xl flex items-center gap-4 shadow-lg">
+        <span
+          class="w-12 h-12 rounded-xl bg-black/25 flex items-center justify-center font-black text-2xl shrink-0">■</span>
+        <span id="proj-teks-opt-3" class="text-2xl font-bold leading-snug">Opsi D</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- STATE P-03: GRAFIK SEBARAN & KUNCI JAWABAN (P-03) -->
+  <!-- ======================================================== -->
+  <div id="state-grafik" class="hidden w-full max-w-4xl space-y-8">
+    <div>
+      <span class="text-sm font-bold uppercase tracking-widest text-[#A7A9BE]">Hasil Jawaban Soal</span>
+      <h2 class="text-4xl font-black text-white mt-1">Grafik Sebaran Jawaban Kelas</h2>
+    </div>
+
+    <!-- 4 Bar Chart Sebaran Jawaban -->
+    <div id="grafik-bars"
+      class="grid grid-cols-4 gap-6 h-64 items-end bg-[#231F47] p-8 rounded-2xl border border-[#2E2D3D]">
+      <!-- Bar A -->
+      <div class="flex flex-col items-center h-full justify-end">
+        <div id="count-bar-0" class="text-2xl font-black text-white mb-2 tabular-nums">0</div>
+        <div id="bar-opt-0" class="w-full bg-[#C93A40] rounded-t-xl transition-all duration-700 min-h-[16px]"></div>
+        <div class="mt-3 flex items-center gap-1.5 font-bold text-lg text-white">
+          <span>▲ A</span>
+          <span id="kunci-badge-0" class="hidden text-emerald-400 font-extrabold">&#10003;</span>
+        </div>
+      </div>
+
+      <!-- Bar B -->
+      <div class="flex flex-col items-center h-full justify-end">
+        <div id="count-bar-1" class="text-2xl font-black text-white mb-2 tabular-nums">0</div>
+        <div id="bar-opt-1" class="w-full bg-[#2F4FC7] rounded-t-xl transition-all duration-700 min-h-[16px]"></div>
+        <div class="mt-3 flex items-center gap-1.5 font-bold text-lg text-white">
+          <span>◆ B</span>
+          <span id="kunci-badge-1" class="hidden text-emerald-400 font-extrabold">&#10003;</span>
+        </div>
+      </div>
+
+      <!-- Bar C -->
+      <div class="flex flex-col items-center h-full justify-end">
+        <div id="count-bar-2" class="text-2xl font-black text-white mb-2 tabular-nums">0</div>
+        <div id="bar-opt-2" class="w-full bg-[#F5A524] rounded-t-xl transition-all duration-700 min-h-[16px]"></div>
+        <div class="mt-3 flex items-center gap-1.5 font-bold text-lg text-white">
+          <span>● C</span>
+          <span id="kunci-badge-2" class="hidden text-emerald-400 font-extrabold">&#10003;</span>
+        </div>
+      </div>
+
+      <!-- Bar D -->
+      <div class="flex flex-col items-center h-full justify-end">
+        <div id="count-bar-3" class="text-2xl font-black text-white mb-2 tabular-nums">0</div>
+        <div id="bar-opt-3" class="w-full bg-[#1F8A57] rounded-t-xl transition-all duration-700 min-h-[16px]"></div>
+        <div class="mt-3 flex items-center gap-1.5 font-bold text-lg text-white">
+          <span>■ D</span>
+          <span id="kunci-badge-3" class="hidden text-emerald-400 font-extrabold">&#10003;</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- STATE P-04: SCOREBOARD TOP 3 (P-04, DS Sec 4.4) -->
+  <!-- ======================================================== -->
+  <div id="state-scoreboard" class="hidden w-full max-w-3xl space-y-6">
+    <div class="text-center">
+      <span class="text-sm font-bold uppercase tracking-widest text-[#A7A9BE]">Peringkat Sementara</span>
+      <h2 class="text-4xl font-black text-white mt-1">Top 3 Teratas</h2>
+    </div>
+
+    <div id="scoreboard-list" class="space-y-4">
+      <!-- Injected via Socket -->
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- STATE P-05: PODIUM AKHIR JUARA (P-05) -->
+  <!-- ======================================================== -->
+  <div id="state-podium" class="hidden w-full max-w-4xl space-y-8">
+    <div class="text-center">
+      <span class="text-base font-bold uppercase tracking-widest text-[#F5A524]">Kuis Selesai!</span>
+      <h1 class="text-5xl font-black text-white mt-1">Podium Juara Kelas</h1>
+    </div>
+
+    <!-- Visual Podium 3 Pilar (2, 1, 3) -->
+    <div id="podium-grid" class="flex items-end justify-center gap-6 h-80 pt-8">
+      <!-- Injected via Socket -->
+    </div>
+  </div>
+
+</div>
+
+<!-- Socket.IO Client Script (Offline Lokal) -->
+<script src="/js/socket.io.min.js"></script>
+<script>
+  const pin = '<%= pin %>';
+  const socket = io();
+
+  let timerInterval = null;
+
+  socket.emit('proyektor_join', { pin });
+
+  // 1. Lobby Real-Time
+  socket.on('sync_peserta_lobby', (data) => updateLobby(data.pesertaList));
+  socket.on('peserta_update', (data) => updateLobby(data.pesertaList));
+
+  function updateLobby(list) {
+    document.getElementById('proj-total-peserta').textContent = list.length;
+    const box = document.getElementById('proj-peserta-list');
+    if (list.length === 0) {
+      box.innerHTML = '<span class="text-sm text-[#A7A9BE]">Menunggu peserta memasukkan nama di HP masing-masing...</span>';
+    } else {
+      box.innerHTML = list.map(p => `
+        <span class="px-3 py-1.5 bg-[#14122B] text-white rounded-xl text-base font-bold border border-[#2E2D3D] shadow-sm animate-fade-in">
+          ${escapeHtml(p.nama)}
+        </span>
+      `).join('');
+    }
+  }
+
+  // 2. Soal Ditampilkan
+  socket.on('soal_ditampilkan_proyektor', (data) => {
+    switchState('state-soal');
+
+    document.getElementById('proj-soal-nomor').textContent = `Soal ${data.soalIndex} dari ${data.totalSoal}`;
+    document.getElementById('proj-soal-teks').textContent = data.soal.teks;
+    document.getElementById('proj-answered-count').textContent = data.answeredCount || '0';
+    document.getElementById('proj-soal-total-peserta').textContent = data.totalPeserta || '0';
+
+    if (data.soal.gambar_path) {
+      document.getElementById('proj-soal-gambar').src = data.soal.gambar_path;
+      document.getElementById('proj-soal-gambar-box').classList.remove('hidden');
+    } else {
+      document.getElementById('proj-soal-gambar-box').classList.add('hidden');
+    }
+
+    // Pasang 4 opsi
+    const opsi = data.soal.opsi;
+    for (let i = 0; i < 4; i++) {
+      const teksEl = document.getElementById(`proj-teks-opt-${i}`);
+      if (teksEl && opsi[i]) {
+        teksEl.textContent = opsi[i].teks;
+      }
+    }
+
+    // Jalankan timer visual lokal
+    if (timerInterval) clearInterval(timerInterval);
+    let sisa = data.waktuDetik;
+    const timerNumEl = document.getElementById('proj-timer-num');
+    timerNumEl.textContent = sisa;
+
+    timerInterval = setInterval(() => {
+      sisa--;
+      if (sisa <= 0) {
+        clearInterval(timerInterval);
+        timerNumEl.textContent = '0';
+      } else {
+        timerNumEl.textContent = sisa;
+      }
+    }, 1000);
+  });
+
+  socket.on('jawaban_masuk', (data) => {
+    document.getElementById('proj-answered-count').textContent = data.answeredCount;
+    document.getElementById('proj-soal-total-peserta').textContent = data.totalPeserta;
+  });
+
+  // 3. Hasil Soal & Grafik Sebaran
+  socket.on('hasil_soal_proyektor', (data) => {
+    if (timerInterval) clearInterval(timerInterval);
+    switchState('state-grafik');
+
+    const totalJawaban = data.distribusi.reduce((acc, d) => acc + d.jumlah_pemilih, 0) || 1;
+
+    data.distribusi.forEach((d, idx) => {
+      const countEl = document.getElementById(`count-bar-${idx}`);
+      const barEl = document.getElementById(`bar-opt-${idx}`);
+      const badgeEl = document.getElementById(`kunci-badge-${idx}`);
+
+      if (countEl) countEl.textContent = d.jumlah_pemilih;
+      if (barEl) {
+        const pct = Math.max(10, Math.round((d.jumlah_pemilih / totalJawaban) * 100));
+        barEl.style.height = `${pct}%`;
+      }
+      if (badgeEl) {
+        if (data.kunciBenarIds.includes(d.opsi_id)) {
+          badgeEl.classList.remove('hidden');
+        } else {
+          badgeEl.classList.add('hidden');
+        }
+      }
+    });
+  });
+
+  // 4. Scoreboard Top 3
+  socket.on('tampil_scoreboard', (data) => {
+    switchState('state-scoreboard');
+    const container = document.getElementById('scoreboard-list');
+
+    const rankColors = [
+      'bg-gradient-to-r from-[#B8860B] to-yellow-600 text-white border-yellow-400', // Juara 1 Emas
+      'bg-gradient-to-r from-[#6B7280] to-gray-600 text-white border-gray-400',    // Juara 2 Perak
+      'bg-gradient-to-r from-[#8A5A2B] to-amber-800 text-white border-amber-600'     // Juara 3 Perunggu
+    ];
+
+    container.innerHTML = data.top3.map((p, idx) => `
+      <div class="flex items-center justify-between p-5 rounded-2xl border ${rankColors[idx] || 'bg-[#231F47] text-white border-[#2E2D3D]'} shadow-xl">
+        <div class="flex items-center gap-4">
+          <span class="w-12 h-12 rounded-xl bg-black/30 flex items-center justify-center font-black text-2xl">
+            #${idx + 1}
+          </span>
+          <span class="text-3xl font-extrabold tracking-wide">${escapeHtml(p.nama)}</span>
+        </div>
+        <div class="text-3xl font-black font-mono tabular-nums">
+          ${p.total_poin} pts
+        </div>
+      </div>
+    `).join('');
+  });
+
+  // 5. Podium Akhir
+  socket.on('kuis_selesai_proyektor', (data) => {
+    switchState('state-podium');
+    const podiumGrid = document.getElementById('podium-grid');
+
+    const top1 = data.top3[0] || null;
+    const top2 = data.top3[1] || null;
+    const top3 = data.top3[2] || null;
+
+    podiumGrid.innerHTML = `
+      <!-- Juara 2 (Perak) -->
+      ${top2 ? `
+        <div class="flex flex-col items-center w-56">
+          <div class="text-xl font-bold text-white mb-2 truncate max-w-full">${escapeHtml(top2.nama)}</div>
+          <div class="text-sm text-gray-300 font-mono mb-2">${top2.total_poin} pts</div>
+          <div class="w-full h-44 bg-gradient-to-t from-gray-700 to-gray-500 rounded-t-2xl flex items-center justify-center font-black text-4xl shadow-xl border-t-2 border-gray-300">
+            2
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- Juara 1 (Emas) -->
+      ${top1 ? `
+        <div class="flex flex-col items-center w-64">
+          <div class="text-2xl font-black text-[#F5A524] mb-2 truncate max-w-full">&#128081; ${escapeHtml(top1.nama)}</div>
+          <div class="text-base text-yellow-200 font-mono font-bold mb-2">${top1.total_poin} pts</div>
+          <div class="w-full h-60 bg-gradient-to-t from-yellow-700 to-yellow-500 rounded-t-2xl flex items-center justify-center font-black text-5xl shadow-2xl border-t-2 border-yellow-200">
+            1
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- Juara 3 (Perunggu) -->
+      ${top3 ? `
+        <div class="flex flex-col items-center w-56">
+          <div class="text-xl font-bold text-white mb-2 truncate max-w-full">${escapeHtml(top3.nama)}</div>
+          <div class="text-sm text-amber-300 font-mono mb-2">${top3.total_poin} pts</div>
+          <div class="w-full h-32 bg-gradient-to-t from-amber-900 to-amber-700 rounded-t-2xl flex items-center justify-center font-black text-4xl shadow-xl border-t-2 border-amber-400">
+            3
+          </div>
+        </div>
+      ` : ''}
+    `;
+  });
+
+  function switchState(targetId) {
+    const states = ['state-lobby', 'state-soal', 'state-grafik', 'state-scoreboard', 'state-podium'];
+    states.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        if (id === targetId) el.classList.remove('hidden');
+        else el.classList.add('hidden');
+      }
+    });
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+</script>

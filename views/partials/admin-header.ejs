@@ -1,0 +1,30 @@
+<header class="h-16 bg-white border-b border-[#DADAE6] flex items-center justify-between px-8 shrink-0">
+  <!-- Breadcrumb & Page Info -->
+  <div class="flex items-center gap-2 text-sm">
+    <a href="/admin/dashboard" class="text-[#5A5A72] hover:text-[#5B3FD1]">QuLab</a>
+    <% if (typeof breadcrumb !=='undefined' && breadcrumb.length> 0) { %>
+      <% breadcrumb.forEach(function(item, index) { %>
+        <span class="text-[#DADAE6]">/</span>
+        <% if (item.url && index < breadcrumb.length - 1) { %>
+          <a href="<%= item.url %>" class="text-[#5A5A72] hover:text-[#5B3FD1]">
+            <%= item.label %>
+          </a>
+          <% } else { %>
+            <span class="text-[#1B1B2F] font-medium">
+              <%= item.label %>
+            </span>
+            <% } %>
+              <% }); %>
+                <% } %>
+  </div>
+
+  <!-- Header Actions / Status -->
+  <div class="flex items-center gap-4">
+    <span class="text-xs text-[#5A5A72] bg-[#F7F7FB] px-2.5 py-1 rounded-md border border-[#DADAE6]">
+      Local Network Access
+    </span>
+    <% if (typeof headerAction !=='undefined' && headerAction) { %>
+      <%- headerAction %>
+        <% } %>
+  </div>
+</header>

@@ -1,0 +1,215 @@
+<div class="space-y-6">
+  <!-- Sesi Header & Controls Card (D-07) -->
+  <div
+    class="bg-white p-6 rounded-xl border border-[#DADAE6] shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <div>
+      <div class="flex items-center gap-3">
+        <span id="badge-status"
+          class="text-xs font-bold uppercase tracking-wider bg-indigo-50 text-[#5B3FD1] px-2.5 py-1 rounded-md">
+          Status: <span id="text-status">
+            <%= status %>
+          </span>
+        </span>
+        <span class="text-sm text-[#5A5A72]">&bull; PIN Kuis:</span>
+        <span class="text-3xl font-black tracking-widest text-[#5B3FD1] font-mono">
+          <%= pin %>
+        </span>
+      </div>
+      <h1 class="text-xl font-bold text-[#1B1B2F] mt-2">
+        <%= matkulNama %> (<%= jumlahSoal %> Soal)
+      </h1>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-3">
+      <!-- Buka Proyektor di Tab Baru -->
+      <a href="/proyektor/<%= pin %>" target="_blank"
+        class="px-4 py-2.5 border-2 border-[#5B3FD1] text-[#5B3FD1] bg-white rounded-lg text-sm font-semibold hover:bg-indigo-50 flex items-center gap-2 shadow-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+        </svg>
+        Buka Layar Proyektor
+      </a>
+
+      <!-- Tombol Aksi Utama Dinamis -->
+      <button id="btn-mulai-kuis" type="button" onclick="mulaiKuis()"
+        class="px-6 py-2.5 bg-[#5B3FD1] text-white rounded-lg text-sm font-bold hover:bg-[#4A31B0] transition-colors shadow">
+        Mulai Kuis
+      </button>
+
+      <button id="btn-tampil-scoreboard" type="button" onclick="tampilScoreboard()"
+        class="hidden px-4 py-2.5 bg-[#2F4FC7] text-white rounded-lg text-sm font-semibold hover:bg-blue-800 transition-colors">
+        Scoreboard Top 3
+      </button>
+
+      <button id="btn-soal-berikutnya" type="button" onclick="soalBerikutnya()"
+        class="hidden px-6 py-2.5 bg-[#1F8A57] text-white rounded-lg text-sm font-bold hover:bg-emerald-700 transition-colors shadow">
+        Soal Berikutnya &rarr;
+      </button>
+
+      <button id="btn-akhiri-sesi" type="button" onclick="akhiriSesi()"
+        class="px-3 py-2.5 border border-red-200 text-[#C93A40] rounded-lg text-sm font-medium hover:bg-red-50">
+        Akhiri Sesi
+      </button>
+    </div>
+  </div>
+
+  <!-- Live Control Status Section (Saat Kuis Berjalan) -->
+  <div id="panel-kuis-berjalan" class="hidden bg-white p-6 rounded-xl border border-[#DADAE6] shadow-sm space-y-4">
+    <div class="flex items-center justify-between border-b border-[#DADAE6] pb-4">
+      <div>
+        <span id="indikator-nomor-soal" class="text-xs font-bold text-[#5B3FD1] uppercase tracking-wider">Soal 1 dari
+          <%= jumlahSoal %></span>
+        <h2 id="judul-soal-aktif" class="text-lg font-bold text-[#1B1B2F] mt-1">-</h2>
+      </div>
+      <div class="text-right">
+        <div class="text-xs text-[#5A5A72]">Jawaban Masuk</div>
+        <div class="text-2xl font-black text-[#1F8A57] tabular-nums">
+          <span id="count-terjawab">0</span> / <span id="count-total-peserta">0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Live Lobby / Daftar Peserta (UF-06 / FR-LOB-02, 04) -->
+  <div class="bg-white rounded-xl border border-[#DADAE6] shadow-sm overflow-hidden">
+    <div class="px-6 py-4 border-b border-[#DADAE6] flex items-center justify-between">
+      <div>
+        <h2 class="font-bold text-[#1B1B2F]">Peserta di Sesi Ini (<span id="total-peserta-label">
+            <%= pesertaList.length %>
+          </span> Mahasiswa)</h2>
+        <span class="text-xs text-[#5A5A72]">Dosen dapat mengeluarkan (kick) peserta bermasalah secara langsung</span>
+      </div>
+      <span
+        class="text-xs font-medium text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Live Socket Sync
+      </span>
+    </div>
+
+    <div id="lobby-empty-notice"
+      class="<%= pesertaList.length > 0 ? 'hidden' : '' %> p-12 text-center text-[#5A5A72] text-sm">
+      <div
+        class="w-12 h-12 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mx-auto mb-2 text-xl font-bold">
+        ?</div>
+      Menunggu peserta memasukkan PIN <strong>
+        <%= pin %>
+      </strong> di HP masing-masing...
+    </div>
+
+    <div id="grid-peserta" class="p-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+      <% if (pesertaList.length> 0) { %>
+        <% pesertaList.forEach(function(p) { %>
+          <div id="peserta-card-<%= p.id %>"
+            class="flex items-center justify-between p-3 rounded-lg border border-[#DADAE6] bg-[#F7F7FB]">
+            <span class="text-sm font-semibold text-[#1B1B2F] truncate">
+              <%= p.nama %>
+            </span>
+            <button type="button" onclick="kickPeserta(<%= p.id %>)"
+              class="text-xs text-[#C93A40] hover:text-red-700 font-bold ml-2 p-1" title="Keluarkan Peserta">
+              &times;
+            </button>
+          </div>
+          <% }); %>
+            <% } %>
+    </div>
+  </div>
+</div>
+
+<!-- Socket.IO Client Script (Offline Lokal) -->
+<script src="/js/socket.io.min.js"></script>
+<script>
+  const pin = '<%= pin %>';
+  const socket = io();
+
+  socket.emit('dosen_join', { pin });
+
+  // Sinkronisasi Daftar Peserta (Live Update)
+  socket.on('sync_peserta_lobby', (data) => updatePesertaList(data.pesertaList));
+  socket.on('peserta_update', (data) => updatePesertaList(data.pesertaList));
+
+  function updatePesertaList(list) {
+    const grid = document.getElementById('grid-peserta');
+    const emptyNotice = document.getElementById('lobby-empty-notice');
+    const totalLabel = document.getElementById('total-peserta-label');
+
+    totalLabel.textContent = list.length;
+    document.getElementById('count-total-peserta').textContent = list.length;
+
+    if (list.length === 0) {
+      emptyNotice.classList.remove('hidden');
+      grid.innerHTML = '';
+      return;
+    }
+
+    emptyNotice.classList.add('hidden');
+    grid.innerHTML = list.map(p => `
+      <div id="peserta-card-${p.id}" class="flex items-center justify-between p-3 rounded-lg border border-[#DADAE6] bg-[#F7F7FB]">
+        <span class="text-sm font-semibold text-[#1B1B2F] truncate">${escapeHtml(p.nama)}</span>
+        <button type="button" onclick="kickPeserta(${p.id})" class="text-xs text-[#C93A40] hover:text-red-700 font-bold ml-2 p-1" title="Keluarkan Peserta">
+          &times;
+        </button>
+      </div>
+    `).join('');
+  }
+
+  function kickPeserta(pesertaId) {
+    if (confirm('Keluarkan peserta ini dari kuis?')) {
+      socket.emit('kick_peserta', { pin, pesertaId });
+    }
+  }
+
+  function mulaiKuis() {
+    socket.emit('mulai_kuis', { pin });
+    document.getElementById('btn-mulai-kuis').classList.add('hidden');
+    document.getElementById('panel-kuis-berjalan').classList.remove('hidden');
+    document.getElementById('text-status').textContent = 'Kuis Berjalan';
+  }
+
+  socket.on('soal_ditampilkan_dosen', (data) => {
+    document.getElementById('indikator-nomor-soal').textContent = `Soal ${data.soalIndex} dari ${data.totalSoal}`;
+    document.getElementById('judul-soal-aktif').textContent = data.soal.teks;
+    document.getElementById('count-terjawab').textContent = '0';
+    document.getElementById('count-total-peserta').textContent = data.totalPeserta;
+
+    document.getElementById('btn-tampil-scoreboard').classList.add('hidden');
+    document.getElementById('btn-soal-berikutnya').classList.add('hidden');
+  });
+
+  socket.on('jawaban_masuk', (data) => {
+    document.getElementById('count-terjawab').textContent = data.answeredCount;
+    document.getElementById('count-total-peserta').textContent = data.totalPeserta;
+  });
+
+  socket.on('hasil_soal_dosen', (data) => {
+    document.getElementById('btn-tampil-scoreboard').classList.remove('hidden');
+    document.getElementById('btn-soal-berikutnya').classList.remove('hidden');
+    if (data.isLastSoal) {
+      document.getElementById('btn-soal-berikutnya').textContent = 'Lihat Podium & Selesai';
+    }
+  });
+
+  function tampilScoreboard() {
+    socket.emit('tampil_scoreboard', { pin });
+  }
+
+  function soalBerikutnya() {
+    socket.emit('soal_berikutnya', { pin });
+  }
+
+  function akhiriSesi() {
+    if (confirm('Yakin ingin mengakhiri sesi kuis ini?')) {
+      socket.emit('akhiri_sesi_manual', { pin });
+    }
+  }
+
+  socket.on('kuis_selesai_dosen', (data) => {
+    alert('Kuis telah selesai dilaksanakan!');
+    window.location.href = `/admin/riwayat/${data.sesiId}`;
+  });
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+</script>

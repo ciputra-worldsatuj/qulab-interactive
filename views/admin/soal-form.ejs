@@ -1,0 +1,107 @@
+<div class="space-y-6 max-w-3xl">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-[#1B1B2F]"><%= typeof isEdit !== 'undefined' && isEdit ? 'Ubah Soal' : 'Tambah Soal Baru' %></h1>
+      <p class="text-sm text-[#5A5A72] mt-1">Mata Kuliah: <strong><%= typeof matkulNama !== 'undefined' ? matkulNama : '' %></strong></p>
+    </div>
+    <a href="/admin/matkul/<%= typeof matkulId !== 'undefined' ? matkulId : '' %>/soal" class="px-3.5 py-2 border border-[#DADAE6] bg-white text-[#1B1B2F] rounded-lg text-sm font-medium hover:bg-[#F7F7FB]">
+      &larr; Batal
+    </a>
+  </div>
+
+  <% if (typeof error !== 'undefined' && error) { %>
+    <div class="p-3 bg-red-50 border border-[#C93A40] text-[#C93A40] rounded-lg text-xs font-medium flex items-center gap-2">
+      <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <span><%= error %></span>
+    </div>
+  <% } %>
+
+  <div class="bg-white rounded-xl border border-[#DADAE6] shadow-sm p-6">
+    <form action="<%= typeof isEdit !== 'undefined' && isEdit ? '/admin/soal/' + soal.id + '/ubah' : '/admin/matkul/' + matkulId + '/soal/baru' %>" method="POST" enctype="multipart/form-data" class="space-y-6" onsubmit="return validateSoalForm()">
+      <!-- Teks Pertanyaan (FR-SOAL-02) -->
+      <div>
+        <label for="teks" class="block text-xs font-semibold text-[#1B1B2F] mb-1">Teks Pertanyaan *</label>
+        <textarea id="teks" name="teks" rows="3" class="w-full px-3 py-2 border border-[#DADAE6] rounded-lg text-sm focus:outline-none focus:border-[#5B3FD1]" placeholder="Tuliskan pertanyaan soal kuis di sini..." required><%= typeof soal !== 'undefined' && soal ? soal.teks : '' %></textarea>
+      </div>
+
+      <!-- Upload Gambar Opsional (Maks 2MB, JPG/PNG/WebP) -->
+      <div>
+        <label for="gambar" class="block text-xs font-semibold text-[#1B1B2F] mb-1">Gambar Soal (Opsional, Maks 2MB)</label>
+        <% if (typeof soal !== 'undefined' && soal && soal.gambar_path) { %>
+          <div class="mb-2 flex items-center gap-4">
+            <img src="<%= soal.gambar_path %>" alt="Gambar Soal" class="h-20 rounded border border-[#DADAE6] object-contain">
+            <span class="text-xs text-[#5A5A72]">Gambar saat ini. Unggah file baru di bawah untuk mengganti.</span>
+          </div>
+        <% } %>
+        <input type="file" id="gambar" name="gambar" accept=".jpg,.jpeg,.png,.webp" class="text-xs text-[#5A5A72] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#F7F7FB] file:text-[#5B3FD1] hover:file:bg-indigo-50">
+      </div>
+
+      <!-- Pengaturan Waktu & Poin -->
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="waktu_detik" class="block text-xs font-semibold text-[#1B1B2F] mb-1">Alokasi Waktu Menjawab (Detik)</label>
+          <input type="number" id="waktu_detik" name="waktu_detik" min="5" max="180" value="<%= typeof soal !== 'undefined' && soal ? soal.waktu_detik : '20' %>" class="w-full px-3 py-2 border border-[#DADAE6] rounded-lg text-sm focus:outline-none focus:border-[#5B3FD1]" required>
+          <span class="text-[11px] text-[#5A5A72]">Standar: 20 detik</span>
+        </div>
+        <div>
+          <label for="poin" class="block text-xs font-semibold text-[#1B1B2F] mb-1">Poin Dasar Soal</label>
+          <input type="number" id="poin" name="poin" min="100" max="5000" step="50" value="<%= typeof soal !== 'undefined' && soal ? soal.poin : '1000' %>" class="w-full px-3 py-2 border border-[#DADAE6] rounded-lg text-sm focus:outline-none focus:border-[#5B3FD1]" required>
+          <span class="text-[11px] text-[#5A5A72]">Standar: 1000 poin</span>
+        </div>
+      </div>
+
+      <!-- 4 Opsi Jawaban (DS Sec 4.2 / FR-SOAL-02) -->
+      <div class="space-y-3 pt-2">
+        <div class="flex items-center justify-between">
+          <label class="block text-xs font-semibold text-[#1B1B2F]">
+            Pilihan Jawaban (Isi 4 Opsi & Centang Jawaban yang Benar) *
+          </label>
+          <span class="text-[11px] text-[#5A5A72]">Bisa mencentang lebih dari satu (soal multi-jawaban)</span>
+        </div>
+
+        <% 
+          const opsiConfig = [
+            { label: 'A', bg: 'bg-[#C93A40]', shape: '▲', colorName: 'Merah' },
+            { label: 'B', bg: 'bg-[#2F4FC7]', shape: '◆', colorName: 'Biru' },
+            { label: 'C', bg: 'bg-[#F5A524] text-[#1F1300]', shape: '●', colorName: 'Kuning' },
+            { label: 'D', bg: 'bg-[#1F8A57]', shape: '■', colorName: 'Hijau' }
+          ];
+        %>
+
+        <% opsiConfig.forEach(function(cfg, idx) { %>
+          <% 
+            const opVal = (typeof soal !== 'undefined' && soal && soal.opsi && soal.opsi[idx]) ? soal.opsi[idx].teks : '';
+            const isChecked = (typeof soal !== 'undefined' && soal && soal.opsi && soal.opsi[idx] && (soal.opsi[idx].is_benar === 1 || soal.opsi[idx].is_benar === true));
+          %>
+          <div class="flex items-center gap-3 p-3 rounded-lg border border-[#DADAE6] hover:border-[#5B3FD1] transition-colors">
+            <input type="checkbox" name="opsi_benar" value="<%= idx %>" <%= isChecked ? 'checked' : '' %> class="w-5 h-5 text-[#5B3FD1] rounded border-[#DADAE6] focus:ring-[#5B3FD1] cursor-pointer" title="Centang jika opsi ini benar">
+            <span class="w-8 h-8 rounded-lg <%= cfg.bg %> <%= cfg.label !== 'C' ? 'text-white' : '' %> text-xs font-bold flex items-center justify-center shrink-0 shadow-sm" title="<%= cfg.colorName %>">
+              <%= cfg.shape %>
+            </span>
+            <input type="text" name="opsi_teks[]" value="<%= opVal %>" class="flex-1 px-3 py-2 border border-[#DADAE6] rounded-lg text-sm focus:outline-none focus:border-[#5B3FD1]" placeholder="Tulis pilihan jawaban <%= cfg.label %>..." required>
+          </div>
+        <% }); %>
+      </div>
+
+      <div class="pt-4 border-t border-[#DADAE6] flex justify-end gap-3">
+        <a href="/admin/matkul/<%= typeof matkulId !== 'undefined' ? matkulId : '' %>/soal" class="px-4 py-2.5 border border-[#DADAE6] text-[#1B1B2F] rounded-lg text-sm font-medium hover:bg-[#F7F7FB]">
+          Batal
+        </a>
+        <button type="submit" class="px-6 py-2.5 bg-[#5B3FD1] hover:bg-[#4A31B0] text-white rounded-lg text-sm font-semibold transition-colors shadow-sm">
+          Simpan Soal
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function validateSoalForm() {
+    const checkboxes = document.querySelectorAll('input[name="opsi_benar"]:checked');
+    if (checkboxes.length === 0) {
+      alert('PENTING: Harap centang minimal satu pilihan jawaban sebagai kunci jawaban benar!');
+      return false;
+    }
+    return true;
+  }
+</script>
